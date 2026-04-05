@@ -1,8 +1,8 @@
 import pandas as pd
-students={'学号':[],'密码':[]}
-managers={'账号':[],'密码':[]}
-students_information={'姓名':[],'年级':[],'班级':[],'学号':[],'选课课程':[]}
-lessons=['人工智能','中医','医用英语','劳动通论']
+students={'学号':[],'密码':[]}  #学生登录信息
+managers={'账号':[],'密码':[]}  #管理员登录信息
+students_information={'姓名':[],'年级':[],'班级':[],'学号':[],'选课课程':[]}  #学生选课信息
+lessons=['人工智能','中医','医用英语','劳动通论']  #选课课程
 def choice_info():
     """选择管理员还是学生？"""
     print("1.管理员")
@@ -10,44 +10,57 @@ def choice_info():
     print("3.退出")
 def students_enter_and_set_info():
     """学生登录注册系统"""
-    print("登录(0)或者注册(1)或者退出界面(2)")
-    choice2=int(input("回答(0或1或2):"))
-    def students_enter_info():
-        """学生登录界面"""
-        print("------登录------")
-        student_id=input("请输入你的学号:")
-        student_password=input("请输入密码:")
-        if ((student_id not in students['学号']) or (student_password not in students['密码'])):
-            if student_id not in students['学号']:
-                print("你输入的学号有误！")
-                students_enter_info()
-            elif student_password not in students['密码']:
-                print("你输入的密码错误！")
-                students_enter_info()
-        else:
-            students_choice()
     def students_set_info():
         """注册界面"""
-        print("------注册------")
-        new_id = input("请输入你的学号:")
-        new_password=input("请设置新密码：")
-        global students
-        students['学号'].append(new_id)
-        students['密码'].append(new_password)
-        students_enter_info()
-    if choice2==0:
-        students_enter_info()
-    elif choice2==1:
-        students_set_info()
-    elif choice2==2:
-        exit_info1=input("是否退出界面？yes or no:")
-        if exit_info1=='yes':
-            choice_info()
-        else:
+        try:
+            print("------学生注册------")
+            new_id = input("请输入你的学号:")
+            new_password=input("请设置新密码：")
+        except ValueError:
+            print("数据异常！")
             students_set_info()
-    else:
-        print("你输入的序号错误！")
-        students_enter_and_set_info()
+        global students
+        if new_id not in students['学号']:
+            students['学号'].append(new_id)
+            students['密码'].append(new_password)
+            students_enter_info()
+        else:
+            print("该用户已注册过！")
+            students_enter_info()
+    def students_enter_info():
+        """学生登录界面"""
+        print("------学生登录------")
+        try:
+            student_id=input("请输入你的学号:")
+            student_password=input("请输入密码:")
+        except ValueError:
+            print("数据异常！")
+            students_set_info()
+        if student_id not in students['学号'] or student_password not in students['密码']:
+            if student_id not in students['学号']:
+                print("你输入的学号有误！")
+                students_set_info()
+            elif student_password not in students['密码']:
+                print("你输入的密码错误！")
+                students_set_info()
+        else:
+            students_choice()
+    while True:
+        print("学生登录(0)或者注册(1)或者退出界面(2)")
+        choice2 = int(input("回答(0或1或2):"))
+        if choice2==0:
+            students_enter_info()
+        elif choice2==1:
+            students_set_info()
+        elif choice2==2:
+            exit_info1=input("是否退出界面？yes or no:")
+            if exit_info1=='yes':
+                break
+            else:
+                students_set_info()
+        else:
+            print("你输入的序号错误！")
+            students_enter_and_set_info()
 def students_choice():
     """学生选课系统"""
     print(lessons)
@@ -58,33 +71,51 @@ def students_choice():
     students_id=input("请输入你的学号:")
     global students_information
     if lessons_choice in lessons:
-        students_information['姓名'].append(students_name)
-        students_information['年级'].append(students_grade)
-        students_information['班级'].append(students_class)
-        students_information['学号'].append(students_id)
-        students_information['选课课程'].append(lessons_choice)
-        df1=pd.DataFrame(students_information)
-        df1.to_csv("学生信息.csv")
-        df10=df1[df1['姓名']==students_name]
-        print(df10)
+        if students_id in students['学号']:
+            students_information['姓名'].append(students_name)
+            students_information['年级'].append(students_grade)
+            students_information['班级'].append(students_class)
+            students_information['学号'].append(students_id)
+            students_information['选课课程'].append(lessons_choice)
+            df1=pd.DataFrame(students_information)
+            df1.to_csv("学生信息.csv")
+            df10=df1[df1['姓名']==students_name]
+            print(df10)
+        else:
+            print("你输入的学号有误！")
     else:
         print("该课程不存在！")
         students_choice()
     exit1_info=input("是否退出？yes or no:")
     if exit1_info=='yes':
-        students_enter_and_set_info()
+        pass
     else:
         students_choice()
 def managers_enter_and_set_info():
     """管理者界面"""
-    print("登录(0)或者注册(1)或者退出界面(2)")
-    choice2 = int(input("回答(0或1或2):"))
+    def managers_set_info():
+        """管理者注册界面"""
+        print("------管理者注册------")
+        try:
+            new_id = input("请输入你的账号:")
+            new_password = input("请设置新密码：")
+        except ValueError:
+            print("数据异常！")
+            managers_set_info()
+        global students
+        managers['账号'].append(new_id)
+        managers['密码'].append(new_password)
+        managers_enter_info()
     def managers_enter_info():
         """管理者登录界面"""
-        print("------登录------")
-        manager_id = input("请输入你的账号:")
-        manager_password = input("请输入密码:")
-        if ((manager_id not in managers['账号']) or (manager_password not in managers['密码'])):
+        print("------管理者登录------")
+        try:
+            manager_id = input("请输入你的账号:")
+            manager_password = input("请输入密码:")
+        except ValueError:
+            print("数据异常！")
+            managers_enter_info()
+        if manager_id not in managers['账号'] or manager_password not in managers['密码']:
             if manager_id not in students['学号']:
                 print("你输入的账号有误！")
                 managers_enter_info()
@@ -93,33 +124,27 @@ def managers_enter_and_set_info():
                 managers_enter_info()
         else:
             managers_choice()
-    def managers_set_info():
-        """注册界面"""
-        print("------注册------")
-        new_id = input("请输入你的账号:")
-        new_password = input("请设置新密码：")
-        global students
-        managers['账号'].append(new_id)
-        managers['密码'].append(new_password)
-        managers_enter_info()
-    if choice2 == 0:
-        managers_enter_info()
-    elif choice2 == 1:
-        managers_set_info()
-    elif choice2 == 2:
-        exit_info1 = input("是否退出界面？yes or no:")
-        if exit_info1 == 'yes':
-            choice_info()
-        else:
+    while True:
+        print("管理者登录(0)或者注册(1)或者退出界面(2)")
+        choice2 = int(input("回答(0或1或2):"))
+        if choice2 == 0:
+            managers_enter_info()
+        elif choice2 == 1:
             managers_set_info()
-    else:
-        print("你输入的序号错误！")
-        managers_enter_and_set_info()
+        elif choice2 == 2:
+            exit_info1 = input("是否退出界面？yes or no:")
+            if exit_info1 == 'yes':
+                break
+            else:
+                managers_set_info()
+        else:
+            print("你输入的序号错误！")
+            managers_enter_and_set_info()
 def managers_choice():
     """管理者界面"""
     def user_info():
         """管理者功能界面"""
-        print("------请选择功能(填写序号)------")
+        print("------请选择功能(管理者填写序号)------")
         print("1.浏览学生信息")
         print("2.删除学生")
         print("3.修改学生信息")
@@ -197,23 +222,24 @@ def managers_choice():
         df1.to_csv("学生信息.csv")
         df10=df1[df1['姓名']==search_name]
         print(df10)
-    while True:
-        user_info()
-        abi=int(input("请输入功能序号:"))
-        if abi==1:
-            show_info()
-        elif abi==2:
-            del_info()
-        elif abi==3:
-            modify_info()
-        elif abi==4:
-            search_info()
-        elif abi==5:
-            exit2=input("是否退出？yes or no？")
-            if exit2=='yes':
-                choice_info()
-            else:
-                managers_choice()
+    user_info()
+    abi=int(input("请输入功能序号:"))
+    if abi==1:
+        show_info()
+    elif abi==2:
+        del_info()
+    elif abi==3:
+        modify_info()
+    elif abi==4:
+        search_info()
+    elif abi==5:
+        exit2=input("是否退出？yes or no？")
+        if exit2=='yes':
+            pass
+        else:
+            managers_choice()
+    else:
+        print("你输入的序号异常！")
 while True:
     """执行流程"""
     choice_info()

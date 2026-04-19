@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>选课系统 | Course Selection System</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: linear-gradient(180deg, rgba(15,23,42,0.84), rgba(15,23,42,0.92)),
+        url('https://images.unsplash.com/photo-1497493292307-31c376b6e479?auto=format&fit=crop&w=1600&q=80') center/cover fixed no-repeat;
+      color: #111827;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 20px;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+      padding: 28px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+    }
+
+    .card.login-card {
+      max-width: 420px;
+      margin: 60px auto 24px;
+      padding: 40px 32px;
+    }
+
+    #mainPage {
+      max-width: 600px;
+      margin: 60px auto 24px;
+    }
+
+    #studentLogin,
+    #studentRegister,
+    #studentEnter,
+    #managerLogin,
+    #managerRegister,
+    #managerEnter {
+      max-width: 420px;
+      margin: 60px auto 24px;
+    }
+
+    h1, h2 {
+      margin-top: 0;
+      color: #0f172a;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 28px 0 32px;
+    }
+
+    .button-group button,
+    button {
+      margin: 0;
+      width: 100%;
+      padding: 18px 20px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+      box-shadow: 0 14px 32px rgba(59, 130, 246, 0.22);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(59, 130, 246, 0.28);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.18);
+    }
+
+    button.cancel {
+      background: linear-gradient(135deg, #6b7280, #4b5563);
+    }
+
+    button.danger {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+
+    button + button {
+      margin-left: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin: 12px 0 6px;
+      color: #334155;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px 14px;
+      margin: 0 0 18px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      box-sizing: border-box;
+      background: #ffffff;
+      color: #0f172a;
+      font-size: 15px;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    th,
+    td {
+      padding: 16px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    tr {
+      line-height: 1.8;
+    }
+
+    th {
+      background: #eff6ff;
+      color: #0f172a;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .info {
+      color: #1d4ed8;
+      margin-top: 12px;
+    }
+
+    .warning {
+      color: #b45309;
+      margin-top: 12px;
+    }
+
+    #studentLogin button,
+    #studentRegister button,
+    #studentEnter button,
+    #studentChangePassword button,
+    #managerLogin button,
+    #managerRegister button,
+    #managerEnter button,
+    #adminChangePassword button {
+      margin-bottom: 12px;
+    }
+
+    #studentLogin button:last-child,
+    #studentRegister button:last-child,
+    #studentEnter button:last-child,
+    #studentChangePassword button:last-child,
+    #managerLogin button:last-child,
+    #managerRegister button:last-child,
+    #managerEnter button:last-child,
+    #adminChangePassword button:last-child {
+      margin-bottom: 0;
+    }
+
+    #studentDashboard button {
+      margin-bottom: 16px;
+    }
+
+    #studentDashboard button:last-child {
+      margin-bottom: 0;
+    }
+
+    .captcha-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .captcha-input {
+      flex: 1;
+    }
+
+    .captcha-canvas {
+      width: 160px;
+      height: 56px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="mainPage" class="card">
+      <h1>欢迎使用选课系统 (Course Selection System)</h1>
+      <div class="button-group">
+        <button onclick="showSection('managerLogin')">管理员登录/注册</button>
+        <button onclick="showSection('studentLogin')">学生登录/注册</button>
+        <button class="secondary" onclick="resetApp()">重置数据</button>
+      </div>
+      <p>本系统使用浏览器本地存储保存数据。关闭浏览器后仍可保留，但请谨慎操作。</p>
+    </div>
+
+    <div id="studentLogin" class="card hidden">
+      <h2>学生系统</h2>
+      <button onclick="showSection('studentEnter')">登录</button>
+      <button onclick="showSection('studentRegister')">注册</button>
+      <button class="cancel" onclick="showSection('mainPage')">返回</button>
+    </div>
+
+    <div id="studentRegister" class="card hidden">
+      <h2>学生注册</h2>
+      <label>学号</label>
+      <input id="studentRegisterId" placeholder="请输入学号" />
+      <label>密码</label>
+      <input id="studentRegisterPass" type="password" placeholder="请输入密码" />
+      <label>验证码</label>
+      <div class="captcha-container">
+        <input id="studentRegisterCaptcha" class="captcha-input" placeholder="请输入验证码" />
+        <canvas id="studentRegisterCaptchaCanvas" class="captcha-canvas" onclick="generateCaptcha('studentRegister')"></canvas>
+      </div>
+      <button onclick="studentRegister()">提交注册</button>
+      <button class="cancel" onclick="showSection('studentLogin')">返回</button>
+      <p id="studentRegisterMessage" class="info"></p>
+    </div>
+
+    <div id="studentEnter" class="card hidden">
+      <h2>学生登录</h2>
+      <label>学号</label>
+      <input id="studentLoginId" placeholder="请输入学号" />
+      <label>密码</label>
+      <input id="studentLoginPass" type="password" placeholder="请输入密码" />
+      <label>验证码</label>
+      <div class="captcha-container">
+        <input id="studentLoginCaptcha" class="captcha-input" placeholder="请输入验证码" />
+        <canvas id="studentLoginCaptchaCanvas" class="captcha-canvas" onclick="generateCaptcha('studentLogin')"></canvas>
+      </div>
+      <button onclick="studentLogin()">登录</button>
+      <button class="secondary" onclick="showSection('studentChangePassword')">修改密码</button>
+      <button class="cancel" onclick="showSection('studentLogin')">返回</button>
+      <p id="studentLoginMessage" class="warning"></p>
+    </div>
+
+    <div id="studentDashboard" class="card hidden">
+      <h2>学生选课系统</h2>
+      <p><strong>当前学号：</strong><span id="currentStudentId"></span></p>
+      <label>姓名</label>
+      <input id="studentName" placeholder="请输入姓名" />
+      <label>年级</label>
+      <select id="studentGrade">
+        <option>2025级</option>
+        <option>2024级</option>
+        <option>2023级</option>
+        <option>2022级</option>
+        <option>2021级</option>
+      </select>
+      <label>班级</label>
+      <select id="studentClass">
+        <option>一班</option>
+        <option>二班</option>
+        <option>三班</option>
+        <option>四班</option>
+        <option>五班</option>
+        <option>六班</option>
+        <option>七班</option>
+        <option>八班</option>
+        <option>九班</option>
+        <option>十班</option>
+        <option>十一班</option>
+        <option>十二班</option>
+        <option>十三班</option>
+        <option>十四班</option>
+        <option>十五班</option>
+        <option>十六班</option>
+        <option>十七班</option>
+        <option>十八班</option>
+      </select>
+      <label>课程选择</label>
+      <select id="studentCourse">
+        <option>人工智能</option>
+        <option>中医</option>
+        <option>医用英语</option>
+        <option>劳动通论</option>
+      </select>
+      <button onclick="submitStudentChoice()">提交选课</button>
+      <button onclick="showStudentCourses()">查看已选课程</button>
+      <button class="cancel" onclick="logoutStudent()">返回主菜单</button>
+      <p id="studentChoiceMessage" class="info"></p>
+    </div>
+
+    <div id="studentCourses" class="card hidden">
+      <h2>已选课程</h2>
+      <div id="studentCoursesTable"></div>
+      <button class="cancel" onclick="showSection('studentDashboard')">返回</button>
+    </div>
+
+    <div id="studentChangePassword" class="card hidden">
+      <h2>学生修改密码</h2>
+      <label>学号</label>
+      <input id="studentChangeId" placeholder="请输入学号" />
+      <label>新密码</label>
+      <input id="studentChangePass" type="password" placeholder="请输入新密码" />
+      <label>确认新密码</label>
+      <input id="studentChangeConfirmPass" type="password" placeholder="请确认新密码" />
+      <button onclick="studentChangePassword()">修改密码</button>
+      <button class="cancel" onclick="showSection('studentEnter')">返回</button>
+      <p id="studentChangeMessage" class="info"></p>
+    </div>
+
+    <div id="managerLogin" class="card hidden">
+      <h2>管理员系统</h2>
+      <button onclick="showSection('managerEnter')">登录</button>
+      <button onclick="showSection('managerRegister')">注册</button>
+      <button class="cancel" onclick="showSection('mainPage')">返回</button>
+    </div>
+
+    <div id="managerRegister" class="card hidden">
+      <h2>管理员注册</h2>
+      <label>账号</label>
+      <input id="managerRegisterId" placeholder="请输入账号" />
+      <label>密码</label>
+      <input id="managerRegisterPass" type="password" placeholder="请输入密码" />
+      <label>验证码</label>
+      <div class="captcha-container">
+        <input id="managerRegisterCaptcha" class="captcha-input" placeholder="请输入验证码" />
+        <canvas id="managerRegisterCaptchaCanvas" class="captcha-canvas" onclick="generateCaptcha('managerRegister')"></canvas>
+      </div>
+      <button onclick="managerRegister()">提交注册</button>
+      <button class="cancel" onclick="showSection('managerLogin')">返回</button>
+      <p id="managerRegisterMessage" class="info"></p>
+    </div>
+
+    <div id="managerEnter" class="card hidden">
+      <h2>管理员登录</h2>
+      <label>账号</label>
+      <input id="managerLoginId" placeholder="请输入账号" />
+      <label>密码</label>
+      <input id="managerLoginPass" type="password" placeholder="请输入密码" />
+      <label>验证码</label>
+      <div class="captcha-container">
+        <input id="managerLoginCaptcha" class="captcha-input" placeholder="请输入验证码" />
+        <canvas id="managerLoginCaptchaCanvas" class="captcha-canvas" onclick="generateCaptcha('managerLogin')"></canvas>
+      </div>
+      <button onclick="managerLogin()">登录</button>
+      <button class="secondary" onclick="showSection('adminChangePassword')">修改密码</button>
+      <button class="cancel" onclick="showSection('managerLogin')">返回</button>
+      <p id="managerLoginMessage" class="warning"></p>
+    </div>
+
+    <div id="managerDashboard" class="card hidden">
+      <h2>管理员管理系统</h2>
+      <div class="button-group">
+        <button onclick="renderStudentInfo()">浏览学生信息</button>
+        <button onclick="showManagerDelete()">删除学生</button>
+        <button onclick="showManagerModify()">修改学生信息</button>
+        <button onclick="showManagerSearch()">查找学生</button>
+        <button class="cancel" onclick="logoutManager()">返回主菜单</button>
+      </div>
+      <div id="managerActionArea"></div>
+    </div>
+
+    <div id="adminChangePassword" class="card hidden">
+      <h2>管理员修改密码</h2>
+      <label>账号</label>
+      <input id="adminChangeId" placeholder="请输入账号" />
+      <label>新密码</label>
+      <input id="adminChangePass" type="password" placeholder="请输入新密码" />
+      <label>确认新密码</label>
+      <input id="adminChangeConfirmPass" type="password" placeholder="请确认新密码" />
+      <button onclick="adminChangePassword()">修改密码</button>
+      <button class="cancel" onclick="showSection('managerEnter')">返回</button>
+      <p id="adminChangeMessage" class="info"></p>
+    </div>
+  </div>
+
+  <script>
+    const lessons = ['人工智能', '中医', '医用英语', '劳动通论'];
+
+    // 验证码存储
+    const captchaCodes = {};
+
+    // 生成随机验证码
+    function generateCaptchaCode() {
+      const chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+      let code = '';
+      for (let i = 0; i < 4; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    // 绘制验证码到Canvas
+    function drawCaptcha(canvas, code) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 背景色
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 随机干扰线
+      for (let i = 0; i < 3; i++) {
+        ctx.strokeStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.3)`;
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+        ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+        ctx.stroke();
+      }
+
+        // 调整画布分辨率并绘制验证码文字
+      canvas.width = 160;
+      canvas.height = 56;
+      for (let i = 0; i < code.length; i++) {
+        ctx.font = '36px Arial';
+        ctx.fillStyle = `rgb(${Math.random() * 100 + 50}, ${Math.random() * 100 + 50}, ${Math.random() * 100 + 50})`;
+        ctx.save();
+        ctx.translate(20 + i * 30, 36);
+        ctx.rotate((Math.random() - 0.5) * 0.4);
+        ctx.fillText(code[i], 0, 0);
+        ctx.restore();
+      }
+
+      // 随机干扰点
+      for (let i = 0; i < 50; i++) {
+        ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.1)`;
+        ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 1, 1);
+      }
+    }
+
+    // 生成验证码
+    function generateCaptcha(type) {
+      const code = generateCaptchaCode();
+      captchaCodes[type] = code.toLowerCase();
+      const canvas = document.getElementById(`${type}CaptchaCanvas`);
+      drawCaptcha(canvas, code);
+    }
+
+    // 验证验证码
+    function validateCaptcha(type, inputCode) {
+      return captchaCodes[type] && captchaCodes[type] === inputCode.toLowerCase();
+    }
+
+    function getStorage(key, defaultValue) {
+      const value = localStorage.getItem(key);
+      return value ? JSON.parse(value) : defaultValue;
+    }
+
+    function setStorage(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+
+    function showSection(id) {
+      document.querySelectorAll('.card').forEach(card => card.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      clearMessages();
+    }
+
+    function clearMessages() {
+      ['studentRegisterMessage', 'studentLoginMessage', 'studentChoiceMessage', 'studentChangeMessage', 'managerRegisterMessage', 'managerLoginMessage', 'adminChangeMessage'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '';
+      });
+    }
+
+    function loadInitialData() {
+      if (!localStorage.getItem('students')) setStorage('students', []);
+      if (!localStorage.getItem('managers')) setStorage('managers', []);
+      if (!localStorage.getItem('studentsInformation')) setStorage('studentsInformation', []);
+    }
+
+    function validatePassword(password) {
+      return /^[A-Za-z0-9]{8,16}$/.test(password) && /[A-Za-z]/.test(password) && /[0-9]/.test(password);
+    }
+
+    function resetApp() {
+      if (confirm('确认重置本地数据？此操作无法撤销。')) {
+        localStorage.removeItem('students');
+        localStorage.removeItem('managers');
+        localStorage.removeItem('studentsInformation');
+        loadInitialData();
+        showSection('mainPage');
+        alert('数据已重置。');
+      }
+    }
+
+    function studentRegister() {
+      const id = document.getElementById('studentRegisterId').value.trim();
+      const password = document.getElementById('studentRegisterPass').value.trim();
+      const captcha = document.getElementById('studentRegisterCaptcha').value.trim();
+      const students = getStorage('students', []);
+
+      if (!id || !password) {
+        document.getElementById('studentRegisterMessage').textContent = '请输入完整学号和密码。';
+        return;
+      }
+      if (!validatePassword(password)) {
+        document.getElementById('studentRegisterMessage').textContent = '密码须为8-16位，且同时包含字母和数字。';
+        return;
+      }
+      if (!validateCaptcha('studentRegister', captcha)) {
+        document.getElementById('studentRegisterMessage').textContent = '验证码错误，请重新输入。';
+        generateCaptcha('studentRegister');
+        return;
+      }
+      if (students.some(s => s.id === id)) {
+        document.getElementById('studentRegisterMessage').textContent = '该学号已注册。';
+        return;
+      }
+      students.push({ id, password });
+      setStorage('students', students);
+      document.getElementById('studentRegisterId').value = '';
+      document.getElementById('studentRegisterPass').value = '';
+      document.getElementById('studentRegisterCaptcha').value = '';
+      showSection('studentEnter');
+    }
+
+    function studentLogin() {
+      const id = document.getElementById('studentLoginId').value.trim();
+      const password = document.getElementById('studentLoginPass').value.trim();
+      const captcha = document.getElementById('studentLoginCaptcha').value.trim();
+      const students = getStorage('students', []);
+      const student = students.find(s => s.id === id);
+
+      if (!validateCaptcha('studentLogin', captcha)) {
+        document.getElementById('studentLoginMessage').textContent = '验证码错误，请重新输入。';
+        generateCaptcha('studentLogin');
+        return;
+      }
+      if (!student) {
+        document.getElementById('studentLoginMessage').textContent = '学号不存在。';
+        return;
+      }
+      if (student.password !== password) {
+        document.getElementById('studentLoginMessage').textContent = '密码错误。';
+        return;
+      }
+      localStorage.setItem('currentStudentId', id);
+      document.getElementById('currentStudentId').textContent = id;
+      showSection('studentDashboard');
+      document.getElementById('studentLoginId').value = '';
+      document.getElementById('studentLoginPass').value = '';
+      document.getElementById('studentLoginCaptcha').value = '';
+    }
+
+    function submitStudentChoice() {
+      const studentId = localStorage.getItem('currentStudentId');
+      const name = document.getElementById('studentName').value.trim();
+      const grade = document.getElementById('studentGrade').value.trim();
+      const className = document.getElementById('studentClass').value.trim();
+      const course = document.getElementById('studentCourse').value;
+      const info = getStorage('studentsInformation', []);
+
+      if (!name || !grade || !className) {
+        document.getElementById('studentChoiceMessage').textContent = '请填写姓名、年级和班级。';
+        return;
+      }
+      if (info.some(item => item.id === studentId && item.course === course)) {
+        document.getElementById('studentChoiceMessage').textContent = '你已经选择了这门课程。';
+        return;
+      }
+      info.push({ name, grade, className, id: studentId, course });
+      setStorage('studentsInformation', info);
+      document.getElementById('studentChoiceMessage').textContent = `选课成功！已选课程：${course}`;
+      document.getElementById('studentName').value = '';
+      document.getElementById('studentGrade').value = '';
+      document.getElementById('studentClass').value = '';
+      showStudentCourses();
+    }
+
+    function showStudentCourses() {
+      const studentId = localStorage.getItem('currentStudentId');
+      const info = getStorage('studentsInformation', []).filter(item => item.id === studentId);
+      const container = document.getElementById('studentCoursesTable');
+      container.innerHTML = '';
+
+      if (info.length === 0) {
+        container.innerHTML = '<p class="warning">当前尚未选课。</p>';
+      } else {
+        const table = document.createElement('table');
+        table.innerHTML = `
+          <thead>
+            <tr><th>姓名</th><th>年级</th><th>班级</th><th>学号</th><th>选课课程</th></tr>
+          </thead>
+          <tbody>${info.map(item => `
+            <tr>
+              <td>${item.name}</td>
+              <td>${item.grade}</td>
+              <td>${item.className}</td>
+              <td>${item.id}</td>
+              <td>${item.course}</td>
+            </tr>`).join('')}</tbody>`;
+        container.appendChild(table);
+      }
+      showSection('studentCourses');
+    }
+
+    function managerRegister() {
+      const id = document.getElementById('managerRegisterId').value.trim();
+      const password = document.getElementById('managerRegisterPass').value.trim();
+      const captcha = document.getElementById('managerRegisterCaptcha').value.trim();
+      const managers = getStorage('managers', []);
+
+      if (!id || !password) {
+        document.getElementById('managerRegisterMessage').textContent = '请输入账号和密码。';
+        return;
+      }
+      if (!validatePassword(password)) {
+        document.getElementById('managerRegisterMessage').textContent = '密码须为8-16位，且同时包含字母和数字。';
+        return;
+      }
+      if (!validateCaptcha('managerRegister', captcha)) {
+        document.getElementById('managerRegisterMessage').textContent = '验证码错误，请重新输入。';
+        generateCaptcha('managerRegister');
+        return;
+      }
+      if (managers.some(m => m.id === id)) {
+        document.getElementById('managerRegisterMessage').textContent = '该账号已存在。';
+        return;
+      }
+      managers.push({ id, password });
+      setStorage('managers', managers);
+      document.getElementById('managerRegisterId').value = '';
+      document.getElementById('managerRegisterPass').value = '';
+      document.getElementById('managerRegisterCaptcha').value = '';
+      showSection('managerEnter');
+    }
+
+    function managerLogin() {
+      const id = document.getElementById('managerLoginId').value.trim();
+      const password = document.getElementById('managerLoginPass').value.trim();
+      const captcha = document.getElementById('managerLoginCaptcha').value.trim();
+      const managers = getStorage('managers', []);
+      const manager = managers.find(m => m.id === id);
+
+      if (!validateCaptcha('managerLogin', captcha)) {
+        document.getElementById('managerLoginMessage').textContent = '验证码错误，请重新输入。';
+        generateCaptcha('managerLogin');
+        return;
+      }
+      if (!manager) {
+        document.getElementById('managerLoginMessage').textContent = '账号不存在。';
+        return;
+      }
+      if (manager.password !== password) {
+        document.getElementById('managerLoginMessage').textContent = '密码错误。';
+        return;
+      }
+      localStorage.setItem('currentManagerId', id);
+      showSection('managerDashboard');
+      document.getElementById('managerActionArea').innerHTML = '<p class="info">欢迎，管理员 ' + id + ' 。请选择操作。</p>';
+      document.getElementById('managerLoginId').value = '';
+      document.getElementById('managerLoginPass').value = '';
+      document.getElementById('managerLoginCaptcha').value = '';
+    }
+
+    function renderStudentInfo() {
+      const info = getStorage('studentsInformation', []);
+      const area = document.getElementById('managerActionArea');
+      if (info.length === 0) {
+        area.innerHTML = '<p class="warning">当前没有学生选课信息。</p>';
+        return;
+      }
+      let html = '<table><thead><tr><th>姓名</th><th>年级</th><th>班级</th><th>学号</th><th>选课课程</th></tr></thead><tbody>';
+      for (const item of info) {
+        html += `<tr><td>${item.name}</td><td>${item.grade}</td><td>${item.className}</td><td>${item.id}</td><td>${item.course}</td></tr>`;
+      }
+      html += '</tbody></table>';
+      area.innerHTML = html;
+    }
+
+    function showManagerDelete() {
+      const area = document.getElementById('managerActionArea');
+      area.innerHTML = `
+        <label>请输入要删除的学生学号</label>
+        <input id="managerDeleteId" placeholder="学号" />
+        <button onclick="deleteStudent()">删除学生</button>
+      `;
+    }
+
+    function deleteStudent() {
+      const id = document.getElementById('managerDeleteId').value.trim();
+      let info = getStorage('studentsInformation', []);
+      const originalLength = info.length;
+      info = info.filter(item => item.id !== id);
+      if (info.length === originalLength) {
+        alert('学号不存在或该学生没有选课记录。');
+        return;
+      }
+      setStorage('studentsInformation', info);
+      alert('学生信息已删除。');
+      renderStudentInfo();
+    }
+
+    function showManagerModify() {
+      const area = document.getElementById('managerActionArea');
+      area.innerHTML = `
+        <label>请输入要修改的学生学号</label>
+        <input id="managerModifyId" placeholder="学号" />
+        <label>修改姓名</label>
+        <input id="managerModifyName" placeholder="新姓名" />
+        <label>修改年级</label>
+        <select id="managerModifyGrade">
+          <option>2025级</option>
+          <option>2024级</option>
+          <option>2023级</option>
+          <option>2022级</option>
+          <option>2021级</option>
+        </select>
+        <label>修改班级</label>
+        <select id="managerModifyClass">
+          <option>一班</option>
+          <option>二班</option>
+          <option>三班</option>
+          <option>四班</option>
+          <option>五班</option>
+          <option>六班</option>
+          <option>七班</option>
+          <option>八班</option>
+          <option>九班</option>
+          <option>十班</option>
+          <option>十一班</option>
+          <option>十二班</option>
+          <option>十三班</option>
+          <option>十四班</option>
+          <option>十五班</option>
+          <option>十六班</option>
+          <option>十七班</option>
+          <option>十八班</option>
+        </select>
+        <label>修改课程</label>
+        <select id="managerModifyCourse">
+          ${lessons.map(lesson => `<option>${lesson}</option>`).join('')}
+        </select>
+        <button onclick="modifyStudent()">提交修改</button>
+      `;
+    }
+
+    function modifyStudent() {
+      const id = document.getElementById('managerModifyId').value.trim();
+      const name = document.getElementById('managerModifyName').value.trim();
+      const grade = document.getElementById('managerModifyGrade').value.trim();
+      const className = document.getElementById('managerModifyClass').value.trim();
+      const course = document.getElementById('managerModifyCourse').value;
+      const info = getStorage('studentsInformation', []);
+      const index = info.findIndex(item => item.id === id);
+      if (index === -1) {
+        alert('学号不存在。');
+        return;
+      }
+      if (name) info[index].name = name;
+      if (grade) info[index].grade = grade;
+      if (className) info[index].className = className;
+      if (course) info[index].course = course;
+      setStorage('studentsInformation', info);
+      alert('学生信息已修改。');
+      renderStudentInfo();
+    }
+
+    function showManagerSearch() {
+      const area = document.getElementById('managerActionArea');
+      area.innerHTML = `
+        <label>请输入要查找的学生姓名</label>
+        <input id="managerSearchName" placeholder="姓名" />
+        <button onclick="searchStudent()">查找学生</button>
+        <div id="managerSearchResult"></div>
+      `;
+    }
+
+    function searchStudent() {
+      const name = document.getElementById('managerSearchName').value.trim();
+      const info = getStorage('studentsInformation', []).filter(item => item.name === name);
+      const result = document.getElementById('managerSearchResult');
+      if (info.length === 0) {
+        result.innerHTML = '<p class="warning">未找到该学生信息。</p>';
+        return;
+      }
+      let html = '<table><thead><tr><th>姓名</th><th>年级</th><th>班级</th><th>学号</th><th>选课课程</th></tr></thead><tbody>';
+      for (const item of info) {
+        html += `<tr><td>${item.name}</td><td>${item.grade}</td><td>${item.className}</td><td>${item.id}</td><td>${item.course}</td></tr>`;
+      }
+      html += '</tbody></table>';
+      result.innerHTML = html;
+    }
+
+    function logoutStudent() {
+      localStorage.removeItem('currentStudentId');
+      showSection('mainPage');
+    }
+
+    function logoutManager() {
+      localStorage.removeItem('currentManagerId');
+      showSection('mainPage');
+    }
+
+    function studentChangePassword() {
+      const id = document.getElementById('studentChangeId').value.trim();
+      const newPassword = document.getElementById('studentChangePass').value.trim();
+      const confirmPassword = document.getElementById('studentChangeConfirmPass').value.trim();
+      const students = getStorage('students', []);
+      const studentIndex = students.findIndex(s => s.id === id);
+
+      if (!id || !newPassword || !confirmPassword) {
+        document.getElementById('studentChangeMessage').textContent = '请输入完整信息。';
+        return;
+      }
+      if (studentIndex === -1) {
+        document.getElementById('studentChangeMessage').textContent = '学号不存在。';
+        return;
+      }
+      if (!validatePassword(newPassword)) {
+        document.getElementById('studentChangeMessage').textContent = '密码须为8-16位，且同时包含字母和数字。';
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        document.getElementById('studentChangeMessage').textContent = '新密码和确认密码不匹配。';
+        return;
+      }
+      students[studentIndex].password = newPassword;
+      setStorage('students', students);
+      document.getElementById('studentChangeId').value = '';
+      document.getElementById('studentChangePass').value = '';
+      document.getElementById('studentChangeConfirmPass').value = '';
+      document.getElementById('studentChangeMessage').textContent = '密码修改成功！';
+    }
+
+    function adminChangePassword() {
+      const id = document.getElementById('adminChangeId').value.trim();
+      const newPassword = document.getElementById('adminChangePass').value.trim();
+      const confirmPassword = document.getElementById('adminChangeConfirmPass').value.trim();
+      const managers = getStorage('managers', []);
+      const managerIndex = managers.findIndex(m => m.id === id);
+
+      if (!id || !newPassword || !confirmPassword) {
+        document.getElementById('adminChangeMessage').textContent = '请输入完整信息。';
+        return;
+      }
+      if (managerIndex === -1) {
+        document.getElementById('adminChangeMessage').textContent = '账号不存在。';
+        return;
+      }
+      if (!validatePassword(newPassword)) {
+        document.getElementById('adminChangeMessage').textContent = '密码须为8-16位，且同时包含字母和数字。';
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        document.getElementById('adminChangeMessage').textContent = '新密码和确认密码不匹配。';
+        return;
+      }
+      managers[managerIndex].password = newPassword;
+      setStorage('managers', managers);
+      document.getElementById('adminChangeId').value = '';
+      document.getElementById('adminChangePass').value = '';
+      document.getElementById('adminChangeConfirmPass').value = '';
+      document.getElementById('adminChangeMessage').textContent = '密码修改成功！';
+    }
+
+    // 为输入框添加回车键提交功能
+    document.addEventListener('DOMContentLoaded', function() {
+      const inputs = document.querySelectorAll('input');
+      inputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            const form = this.closest('.card');
+            const submitButton = form.querySelector('button:not(.cancel)');
+            if (submitButton) {
+              submitButton.click();
+            }
+          }
+        });
+      });
+
+      // 初始化数据和界面
+      loadInitialData();
+      showSection('mainPage');
+
+      // 初始化验证码
+      generateCaptcha('studentRegister');
+      generateCaptcha('studentLogin');
+      generateCaptcha('managerRegister');
+      generateCaptcha('managerLogin');
+    });
+  </script>
+</body>
+</html>
